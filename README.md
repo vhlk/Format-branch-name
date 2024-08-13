@@ -11,6 +11,13 @@ or
 pip3 install -r requirements.txt
 ```
 
+
+### Linux prerequisite
+For copy/paste it's also needed to use xclip. Install with:
+```
+sudo apt install xclip
+```
+
 # Running
 ```
 python format_branch_name.py
