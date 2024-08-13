@@ -8,7 +8,7 @@ print("Digite o nome:")
 name = input()
 
 # remover caracteres especiais
-name = name.translate({ord(c): "" for c in "!@#$%^&*()[]{};:,./<>?\|`~-=_+"})
+name = name.translate({ord(c): "" for c in R"!@#$%^&*()[]{};:,./<>?\|`~-=_+"})
 
 # remover mais alguns
 name = re.sub(r"[àâáã]", 'a', name)
