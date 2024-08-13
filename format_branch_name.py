@@ -26,6 +26,10 @@ branches_opts = [
 
 opt = beaupy.select(options=branches_opts)
 
+# simplify 'feature' to be 'feat'
+if opt == "feature":
+    opt = "feat"
+
 name = opt + "/" + name.replace(" ", "-")
 
 print("Nome formatado:")
