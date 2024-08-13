@@ -22,6 +22,14 @@ There is two ways: creating a symbolic link or adding this directory to the path
 sudo ln -s `pwd`/format_branch_name.py /usr/local/bin/fbn
 ```
 
+# Windows (experimental)
+We will be using doskey for that and addind it to register:
+```
+doskey fbn = python "%cd%/format_branch_name.py"
+doskey /macros > "%cd%/doskey-macros.txt"
+reg add "HKCU\Software\Microsoft\Command Processor" /v Autorun /d "doskey /macrofile=\"%cd%\doskey-macros.txt\"" /f
+```
+
 # Running
 Just do
 ```
