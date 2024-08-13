@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import re
 import pyperclip
+import beaupy
 
 print("Digite o nome:")
 
@@ -17,7 +18,15 @@ name = re.sub(r"[óõô]", 'o', name)
 name = re.sub(r"[úûũ]", 'u', name)
 name = re.sub(r"[ç]", 'c', name)
 
-name = "feature/" + name.replace(" ", "-")
+branches_opts = [
+    "feature",
+    "fix",
+    "hotfix"
+]
+
+opt = beaupy.select(options=branches_opts)
+
+name = opt + "/" + name.replace(" ", "-")
 
 print("Nome formatado:")
 print(name)
