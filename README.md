@@ -23,9 +23,13 @@ sudo ln -s `pwd`/format_branch_name.py /usr/local/bin/fbn
 ```
 
 ## Windows (experimental)
-For now, only on cmd, just run this bat:
+### Just CMD (Command Prompt)
 ```
 cmd.bat
+```
+### CMD and Powershell
+```
+addexetoenv.bat
 ```
 
 # Running
@@ -33,7 +37,7 @@ Just do
 ```
 fbn
 ```
-anywhere in a terminal.
+anywhere in a terminal. Or "fbn.exe", if you used the "addexetoenv.bat" script.
 
 <br><br>
 
