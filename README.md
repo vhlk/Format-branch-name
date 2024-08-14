@@ -2,6 +2,8 @@
 Formating branch names to be compatible with our Gitlab standard
 
 # Installing
+(It's considered that Python is already installed in your system)
+
 Just do
 ```
 pip install -r requirements.txt
