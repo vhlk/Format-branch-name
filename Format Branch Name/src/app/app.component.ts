@@ -9,7 +9,7 @@ import { writeText } from '@tauri-apps/plugin-clipboard-manager';
 
 @Component({
   selector: "app-root",
-  imports: [RouterOutlet, FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule],
   templateUrl: "./app.component.html",
   styleUrl: "./app.component.css",
 })
@@ -32,6 +32,10 @@ export class AppComponent {
 
   // Guarda todas as branches (locais e remotas) para validação
   allBranches: Set<string> = new Set();
+
+  // Mapeia o nome de exibição para a referência remota (se existir)
+  // Isso garante que vamos ramificar do código mais recente da nuvem
+  branchBaseMapping: Map<string, string> = new Map();
 
   // Modals state
   showSettingsDialog: boolean = false;
@@ -67,9 +71,11 @@ export class AppComponent {
     this.filteredDropdownValues = [];
     this.selectedDropdownValue = "";
     this.allBranches.clear();
+    this.branchBaseMapping.clear();
 
     try {
       // 1. Faz o fetch das branches remotas e faz prune de apagadas
+      // Ao fazer isso, o Git baixa todas as atualizações da nuvem para o computador.
       const fetchCmd = Command.create('git', ['fetch', '--all', '--prune'], { cwd: directory });
       await fetchCmd.execute();
 
@@ -78,29 +84,36 @@ export class AppComponent {
       const allBranchesOutput = await allBranchesCmd.execute();
 
       if (allBranchesOutput.code === 0) {
-        const all = allBranchesOutput.stdout
+        const rawBranches = allBranchesOutput.stdout
           .split('\n')
           // Remove o asterisco da branch atual e espaços em branco
           .map(b => b.replace(/^\*?\s+/, '').trim())
-          .filter(b => b.length > 0 && !b.includes('->'))
-          .map(b => {
+          .filter(b => b.length > 0 && !b.includes('->'));
+
+        rawBranches.forEach(original => {
+             let cleanName = original;
+
              // Limpa "remotes/origin/branch-name" para "branch-name"
-             if (b.startsWith('remotes/')) {
-               const parts = b.split('/');
+             if (original.startsWith('remotes/')) {
+               const parts = original.split('/');
                parts.splice(0, 2); // Remove 'remotes' e o nome do remote
-               return parts.join('/');
+               cleanName = parts.join('/');
              }
-             return b;
-          })
-          // Remove possíveis duplicatas (ex: mesma branch local e no remote)
-          .filter((value, index, self) => self.indexOf(value) === index);
+
+             this.allBranches.add(cleanName);
+
+             // Prioriza guardar a referência remota (ex: remotes/origin/main)
+             // Assim, se o usuário escolher 'main', usaremos a versão da nuvem e não a local desatualizada
+             if (!this.branchBaseMapping.has(cleanName) || original.startsWith('remotes/')) {
+                 this.branchBaseMapping.set(cleanName, original);
+             }
+        });
+
+        const all = Array.from(this.allBranches);
 
         // Atualiza a lista do dropdown com as branches
         this.dropdownValues = all;
         this.filteredDropdownValues = [...all];
-
-        // Salva na lista de validação
-        this.allBranches = new Set(all);
       } else {
         error(`Erro ao listar branches: ${allBranchesOutput.stderr}`);
         alert("Erro ao listar as branches do repositório Git.");
@@ -282,24 +295,27 @@ export class AppComponent {
 
     const branchName = this.formattedBranchName;
 
-    info(branchName);
+    // Pega a referência real da branch pai (se for remota, usa a versão do remote)
+    const baseBranchForCheckout = this.branchBaseMapping.get(this.selectedDropdownValue) || this.selectedDropdownValue;
+
+    info(`Tentando criar branch: ${branchName} a partir de ${baseBranchForCheckout}`);
 
     try {
       // Cria a nova branch a partir da branch pai selecionada
       // git checkout -b <nome-da-branch> <branch-pai>
-      const createBranchCmd = Command.create('git', ['checkout', '-b', branchName, this.selectedDropdownValue], { cwd: this.selectedFolder });
+      const createBranchCmd = Command.create('git', ['checkout', '-b', branchName, baseBranchForCheckout], { cwd: this.selectedFolder });
       const output = await createBranchCmd.execute();
 
       if (output.code === 0) {
-        info(`Branch '${branchName}' criada com sucesso a partir de '${this.selectedDropdownValue}'`);
+        info(`Branch '${branchName}' criada com sucesso a partir de '${baseBranchForCheckout}'`);
 
         let copied = false;
         try {
-          // Copia para o clipboard (isso pode ser bloqueado pelo navegador dependendo das permissões / atraso assíncrono)
+          // Copia para o clipboard (agora usando o plugin oficial tauri-plugin-clipboard-manager)
           await writeText(branchName);
           copied = true;
         } catch (clipboardErr) {
-          error(`Aviso: não foi possível copiar para o clipboard (provável bloqueio de permissão no Tauri): ${clipboardErr}`);
+          error(`Aviso: não foi possível copiar para o clipboard: ${clipboardErr}`);
         }
 
         if (copied) {
