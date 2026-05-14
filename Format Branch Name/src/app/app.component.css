@@ -1,0 +1,564 @@
+/* Importando ícones do Google Fonts para uso futuro, caso deseje adicionar na index.html.
+   Por enquanto, simulamos com estilos CSS. */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+:host {
+  display: block;
+  font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #202124; /* Cinza bem escuro do Google */
+  background-color: transparent; /* O fundo agora é controlado globalmente */
+  height: 100%;
+  width: 100%;
+}
+
+.app-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100%;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+/* O Card Principal - Elevação e Elegância */
+.card-container {
+  background-color: #ffffff;
+  border-radius: 16px; /* Arredondamento moderno M3 */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05), 0 1px 4px rgba(0, 0, 0, 0.02);
+  width: 100%;
+  max-width: 600px; /* Mais estreito para melhor leitura */
+  /* Removemos o 'overflow: hidden' e transformamos o card num contêiner que PODE rolar caso o conteúdo seja maior que ele */
+  max-height: calc(100vh - 48px); /* Limite de altura é o tamanho da tela subtraído dos paddings do wrapper */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Cabeçalho */
+.header-section {
+  padding: 32px 32px 16px;
+  background: linear-gradient(145deg, #f8faff 0%, #ffffff 100%);
+  border-bottom: 1px solid #f1f3f4;
+  text-align: center;
+  flex-shrink: 0; /* Impede o cabeçalho de amassar caso haja scroll */
+}
+
+h1 {
+  margin: 0 0 8px 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: #1a73e8; /* Azul principal */
+  letter-spacing: -0.5px;
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 15px;
+  color: #5f6368;
+  font-weight: 400;
+}
+
+/* Corpo do Formulário */
+.form-content {
+  padding: 24px 32px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px; /* <--- Reduzido de 32px para 24px para aproximar os elementos */
+  overflow-y: auto; /* Permite a rolagem apenas no formulário (dentro do card) */
+  flex-grow: 1; /* Ocupa o restante do espaço disponível e empurra caso exceda o tamanho da tela */
+}
+
+.form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.section-title {
+  margin: 0;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #80868b;
+  font-weight: 700;
+  border-bottom: 2px solid #f1f3f4;
+  padding-bottom: 8px;
+}
+
+/* Grupos e Labels */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #3c4043;
+}
+
+/* Wrappers e Inputs */
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.material-icon {
+  position: absolute;
+  left: 12px;
+  color: #9aa0a6;
+  font-size: 16px;
+  pointer-events: none;
+}
+
+.input-field {
+  width: 100%;
+  padding: 14px 16px;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #202124;
+  background-color: #f8f9fa;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  outline: none;
+  transition: all 0.2s ease-in-out;
+  box-sizing: border-box;
+}
+
+.input-field.with-icon {
+  padding-left: 40px;
+}
+
+.input-field:hover:not(:read-only):not(:disabled) {
+  background-color: #f1f3f4;
+}
+
+.input-field:focus {
+  background-color: #ffffff;
+  border-color: #1a73e8;
+  box-shadow: 0 0 0 4px rgba(26, 115, 232, 0.15);
+}
+
+.input-field:read-only {
+  color: #5f6368;
+  cursor: default;
+}
+
+.input-field:disabled {
+  background-color: #e9ecef;
+  color: #adb5bd;
+  cursor: not-allowed;
+}
+
+/* Estilo de erro para o input */
+.input-field.input-error {
+  border-color: #d93025;
+  background-color: #fce8e6;
+}
+
+.input-field.input-error:focus {
+  box-shadow: 0 0 0 4px rgba(217, 48, 37, 0.15);
+}
+
+/* Select customizado (legacy class kept for reference if needed elsewhere) */
+.select-wrapper {
+  position: relative;
+}
+
+.select-wrapper::after {
+  content: '▼';
+  font-size: 12px;
+  color: #5f6368;
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+select.input-field {
+  appearance: none;
+  padding-right: 40px;
+  cursor: pointer;
+}
+
+select.input-field:disabled {
+  cursor: not-allowed;
+}
+
+/* Autocomplete Dropdown List */
+.autocomplete-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin: 4px 0 0;
+  padding: 8px 0;
+  background-color: #ffffff;
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  list-style: none;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+.autocomplete-item {
+  padding: 10px 16px;
+  font-size: 14px;
+  color: #202124;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.autocomplete-item:hover {
+  background-color: #f1f3f4;
+}
+
+.autocomplete-item.empty-state {
+  color: #5f6368;
+  font-style: italic;
+  cursor: default;
+}
+
+.autocomplete-item.empty-state:hover {
+  background-color: transparent;
+}
+
+
+/* Input + Botão (Procurar) */
+.folder-input-group {
+  display: flex;
+  gap: 12px;
+}
+
+.folder-input-group .input-wrapper {
+  flex: 1;
+}
+
+/* Dica de texto */
+.hint-text {
+  font-size: 13px;
+  color: #5f6368;
+  margin-top: 2px;
+}
+
+.error-text {
+  animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+@keyframes shake {
+  10%, 90% { transform: translate3d(-1px, 0, 0); }
+  20%, 80% { transform: translate3d(2px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+  40%, 60% { transform: translate3d(4px, 0, 0); }
+}
+
+/* Botões Modernos */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: inherit;
+}
+
+/* Botão Secundário (Tonal - Material 3 style) */
+.btn-tonal {
+  background-color: #e8f0fe;
+  color: #1967d2;
+}
+
+.btn-tonal:hover {
+  background-color: #d2e3fc;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.btn-tonal:active {
+  background-color: #c2d7fa;
+}
+
+/* Botão Primário */
+.btn-primary {
+  background-color: #1a73e8;
+  color: #ffffff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: #1b66c9;
+  box-shadow: 0 4px 8px rgba(26, 115, 232, 0.3);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active:not(:disabled) {
+  background-color: #174ea6;
+  box-shadow: 0 1px 2px rgba(26, 115, 232, 0.2);
+  transform: translateY(0);
+}
+
+.btn-primary:disabled {
+  background-color: #cccccc;
+  color: #ffffff;
+  box-shadow: none;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.btn-large {
+  width: 100%;
+  padding: 16px 24px;
+  font-size: 16px;
+  border-radius: 12px; /* Arredondamento maior para botão principal */
+}
+
+/* Radio Buttons estilo "Cards" Selecionáveis */
+.radio-group-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.radio-card {
+  position: relative;
+  cursor: pointer;
+}
+
+/* Esconde o radio real */
+.radio-card input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* Estilo do falso card */
+.radio-card .card-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 8px;
+  background-color: #ffffff;
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.radio-card:hover .card-content {
+  background-color: #f8faff;
+  border-color: #d2e3fc;
+}
+
+/* Estado Selecionado */
+.radio-card.selected .card-content {
+  background-color: #e8f0fe;
+  border-color: #1a73e8;
+  border-width: 2px;
+  padding: 15px 7px; /* Compensa a borda de 2px para não pular */
+}
+
+.radio-card .icon {
+  font-size: 20px;
+  filter: grayscale(100%);
+  opacity: 0.6;
+  transition: all 0.2s;
+}
+
+.radio-card.selected .icon {
+  filter: grayscale(0%);
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.radio-card .label-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: #5f6368;
+}
+
+.radio-card.selected .label-text {
+  color: #1a73e8;
+  font-weight: 700;
+}
+
+/* Área inferior */
+.actions-section {
+  margin-top: 0; /* <--- Reduzido para 0 para aproximar o botão do elemento de cima */
+  flex-shrink: 0; /* Impede o botão final de ser esmagado pelo scroll do flexbox */
+}
+
+/* Modal e Settings */
+.settings-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.settings-btn:hover {
+  background-color: #f1f3f4;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.modal-content {
+  background-color: #ffffff;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-content.modal-large {
+  max-width: 500px;
+  max-height: 80vh;
+}
+
+.modal-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid #f1f3f4;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #202124;
+}
+
+.close-btn {
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: #5f6368;
+}
+
+.close-btn:hover {
+  color: #202124;
+}
+
+.modal-body {
+  padding: 24px;
+  overflow-y: auto;
+}
+
+.modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid #f1f3f4;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* Custom danger button */
+.btn-danger-outline {
+  background-color: #ffffff;
+  color: #d93025 !important;
+  border: 1px solid #d93025;
+}
+
+.btn-danger-outline:hover {
+  background-color: #fce8e6 !important;
+}
+
+.btn-danger {
+  background-color: #d93025 !important;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background-color: #b31412 !important;
+}
+
+.branches-list-container {
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.branch-checkbox-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  gap: 12px;
+  border-bottom: 1px solid #f1f3f4;
+  cursor: pointer;
+}
+
+.branch-checkbox-item:last-child {
+  border-bottom: none;
+}
+
+.branch-checkbox-item:hover {
+  background-color: #f8f9fa;
+}
+
+.branch-checkbox-item input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.empty-state {
+  padding: 24px;
+  text-align: center;
+  color: #5f6368;
+  font-style: italic;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Responsividade Básica */
+@media (max-width: 480px) {
+  .radio-group-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .folder-input-group {
+    flex-direction: column;
+  }
+
+  .btn-tonal {
+    width: 100%;
+  }
+}
