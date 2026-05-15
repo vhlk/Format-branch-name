@@ -1,6 +1,5 @@
-/* Importando ícones do Google Fonts para uso futuro, caso deseje adicionar na index.html.
-   Por enquanto, simulamos com estilos CSS. */
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+/* Arquivo de estilo do componente.
+   As fontes e reset global foram movidos para styles.css para evitar avisos de budget do Angular. */
 
 :host {
   display: block;
@@ -14,7 +13,7 @@
 .app-wrapper {
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
   min-height: 100%;
   padding: 24px;
   box-sizing: border-box;
@@ -27,10 +26,11 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05), 0 1px 4px rgba(0, 0, 0, 0.02);
   width: 100%;
   max-width: 600px; /* Mais estreito para melhor leitura */
-  /* Removemos o 'overflow: hidden' e transformamos o card num contêiner que PODE rolar caso o conteúdo seja maior que ele */
-  max-height: calc(100vh - 48px); /* Limite de altura é o tamanho da tela subtraído dos paddings do wrapper */
+  margin: auto;
   display: flex;
   flex-direction: column;
+  transform: translateZ(0); /* Força a renderização em GPU para evitar ghosting/rastros de sombras na Webview */
+  will-change: transform;
 }
 
 /* Cabeçalho */
@@ -62,9 +62,13 @@ h1 {
   padding: 24px 32px 32px;
   display: flex;
   flex-direction: column;
-  gap: 24px; /* <--- Reduzido de 32px para 24px para aproximar os elementos */
-  overflow-y: auto; /* Permite a rolagem apenas no formulário (dentro do card) */
-  flex-grow: 1; /* Ocupa o restante do espaço disponível e empurra caso exceda o tamanho da tela */
+  gap: 24px;
+  /* Mudança Crítica: Permitir que o form-content cresça, mas remover o overflow-y: auto isolado
+     para que o menu do autocompletar não crie um scroll interno escondido.
+     O scroll agora pode ser gerenciado de forma mais inteligente se necessário,
+     mas para o autocomplete flutuar livremente, o overflow não pode clipar os absolutos. */
+  overflow: visible;
+  flex-grow: 1;
 }
 
 .form-section {
@@ -91,10 +95,19 @@ h1 {
   gap: 8px;
 }
 
-label {
+fieldset.form-group {
+  border: none;
+  margin: 0;
+  padding: 0;
+  min-width: 0; /* Previne overflow em flex-containers */
+}
+
+label,
+legend {
   font-size: 14px;
   font-weight: 500;
   color: #3c4043;
+  padding: 0;
 }
 
 /* Wrappers e Inputs */
@@ -122,7 +135,7 @@ label {
   border: 1px solid transparent;
   border-radius: 8px;
   outline: none;
-  transition: all 0.2s ease-in-out;
+  transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out, background-color 0.2s ease-in-out;
   box-sizing: border-box;
 }
 
@@ -161,7 +174,7 @@ label {
   box-shadow: 0 0 0 4px rgba(217, 48, 37, 0.15);
 }
 
-/* Select customizado (legacy class kept for reference if needed elsewhere) */
+/* Select customizado (legacy class kept for reference se ainda tiver algum select na base) */
 .select-wrapper {
   position: relative;
 }
@@ -394,7 +407,7 @@ select.input-field:disabled {
 
 /* Área inferior */
 .actions-section {
-  margin-top: 0; /* <--- Reduzido para 0 para aproximar o botão do elemento de cima */
+  margin-top: 0; /* Reduzido para aproximar o botão do elemento de cima */
   flex-shrink: 0; /* Impede o botão final de ser esmagado pelo scroll do flexbox */
 }
 

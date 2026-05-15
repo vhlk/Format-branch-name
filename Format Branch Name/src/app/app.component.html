@@ -1,7 +1,12 @@
 <main class="app-wrapper">
   <div class="card-container">
-    <div class="header-section" style="position: relative;">
-      <button type="button" class="icon-btn settings-btn" (click)="openSettings()" title="Configurações">
+    <div class="header-section" style="position: relative">
+      <button
+        type="button"
+        class="icon-btn settings-btn"
+        (click)="openSettings()"
+        title="Configurações"
+      >
         ⚙️
       </button>
       <h1>{{ title }}</h1>
@@ -9,7 +14,6 @@
     </div>
 
     <form #branchForm="ngForm" (ngSubmit)="onSubmit()" class="form-content">
-
       <!-- Seção do Projeto -->
       <div class="form-section">
         <h2 class="section-title">Contexto</h2>
@@ -30,16 +34,33 @@
                 required
               />
             </div>
-            <button type="button" class="btn btn-tonal" (click)="onChooseFolder()">Procurar</button>
+            <button
+              type="button"
+              class="btn btn-tonal"
+              (click)="onChooseFolder()"
+            >
+              Procurar
+            </button>
           </div>
         </div>
 
         <div class="form-group">
-          <label for="dropdown" style="display: flex; justify-content: space-between; align-items: center;">
+          <label
+            for="dropdown"
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+            "
+          >
             <span>Branch pai</span>
-            <span *ngIf="isLoadingBranches" style="font-size: 12px; color: #1a73e8; font-style: italic;">Carregando...</span>
+            @if (isLoadingBranches) {
+              <span style="font-size: 12px; color: #1a73e8; font-style: italic"
+                >Carregando...</span
+              >
+            }
           </label>
-          <div class="autocomplete-wrapper" style="position: relative;">
+          <div class="autocomplete-wrapper" style="position: relative">
             <div class="input-wrapper">
               <span class="material-icon">🔀</span>
               <input
@@ -47,33 +68,72 @@
                 id="dropdown"
                 name="dropdown"
                 class="input-field with-icon"
-                [class.input-error]="selectedDropdownValue && !isBranchPaiValid && !showDropdown"
+                [class.input-error]="
+                  selectedDropdownValue && !isBranchPaiValid && !showDropdown
+                "
                 [(ngModel)]="selectedDropdownValue"
                 (input)="filterBranches()"
                 (focus)="filterBranches()"
-                (blur)="hideDropdownDelayed()"
+                (blur)="hideDropdown()"
                 [disabled]="isLoadingBranches || dropdownValues.length === 0"
                 autocomplete="off"
-                placeholder="{{ isLoadingBranches ? 'Buscando do repositório...' : (dropdownValues.length === 0 ? 'Nenhuma branch encontrada' : 'Digite para buscar uma branch...') }}"
+                placeholder="{{
+                  isLoadingBranches
+                    ? 'Buscando do repositório...'
+                    : dropdownValues.length === 0
+                      ? 'Nenhuma branch remota encontrada'
+                      : 'Digite para buscar uma branch...'
+                }}"
                 required
               />
             </div>
 
             <!-- Dropdown List -->
-            <ul class="autocomplete-list" *ngIf="showDropdown && filteredDropdownValues.length > 0">
-              <li *ngFor="let option of filteredDropdownValues"
-                  (mousedown)="selectBranch(option)"
-                  class="autocomplete-item">
-                {{ option }}
-              </li>
-            </ul>
-            <ul class="autocomplete-list" *ngIf="showDropdown && filteredDropdownValues.length === 0 && selectedDropdownValue">
-              <li class="autocomplete-item empty-state">Nenhuma branch encontrada</li>
-            </ul>
+            @if (showDropdown && filteredDropdownValues.length > 0) {
+              <ul
+                class="autocomplete-list"
+                (mousedown)="$event.preventDefault()"
+              >
+                @for (option of filteredDropdownValues; track option) {
+                  <li
+                    (mousedown)="selectBranch(option)"
+                    class="autocomplete-item"
+                  >
+                    {{ option }}
+                  </li>
+                }
+              </ul>
+            }
+            @if (
+              showDropdown &&
+              filteredDropdownValues.length === 0 &&
+              selectedDropdownValue
+            ) {
+              <ul
+                class="autocomplete-list"
+                (mousedown)="$event.preventDefault()"
+              >
+                <li class="autocomplete-item empty-state">
+                  Nenhuma branch encontrada
+                </li>
+              </ul>
+            }
           </div>
-          <span class="error-text" *ngIf="selectedDropdownValue && !isBranchPaiValid && !showDropdown" style="color: #d93025; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 4px;">
-            ⚠️ Selecione uma branch válida da lista
-          </span>
+          @if (selectedDropdownValue && !isBranchPaiValid && !showDropdown) {
+            <span
+              class="error-text"
+              style="
+                color: #d93025;
+                font-size: 13px;
+                font-weight: 500;
+                display: flex;
+                align-items: center;
+                gap: 4px;
+              "
+            >
+              ⚠️ Selecione uma branch válida da lista
+            </span>
+          }
         </div>
       </div>
 
@@ -81,11 +141,20 @@
       <div class="form-section">
         <h2 class="section-title">Detalhes da Branch</h2>
 
-        <div class="form-group">
-          <label>Qual o tipo da branch?</label>
+        <fieldset class="form-group" role="radiogroup">
+          <legend>Qual o tipo da branch?</legend>
           <div class="radio-group-cards">
-            <label class="radio-card" [class.selected]="branchType === 'feature'">
-              <input type="radio" name="branchType" value="feature" [(ngModel)]="branchType" required>
+            <label
+              class="radio-card"
+              [class.selected]="branchType === 'feature'"
+            >
+              <input
+                type="radio"
+                name="branchType"
+                value="feature"
+                [(ngModel)]="branchType"
+                required
+              />
               <div class="card-content">
                 <span class="icon feature-icon">✨</span>
                 <span class="label-text">Feature</span>
@@ -93,22 +162,37 @@
             </label>
 
             <label class="radio-card" [class.selected]="branchType === 'fix'">
-              <input type="radio" name="branchType" value="fix" [(ngModel)]="branchType" required>
+              <input
+                type="radio"
+                name="branchType"
+                value="fix"
+                [(ngModel)]="branchType"
+                required
+              />
               <div class="card-content">
                 <span class="icon fix-icon">🐛</span>
                 <span class="label-text">Fix</span>
               </div>
             </label>
 
-            <label class="radio-card" [class.selected]="branchType === 'hotfix'">
-              <input type="radio" name="branchType" value="hotfix" [(ngModel)]="branchType" required>
+            <label
+              class="radio-card"
+              [class.selected]="branchType === 'hotfix'"
+            >
+              <input
+                type="radio"
+                name="branchType"
+                value="hotfix"
+                [(ngModel)]="branchType"
+                required
+              />
               <div class="card-content">
                 <span class="icon hotfix-icon">🔥</span>
                 <span class="label-text">Hotfix</span>
               </div>
             </label>
           </div>
-        </div>
+        </fieldset>
 
         <div class="form-group">
           <label for="textInput">Nome da nova branch</label>
@@ -122,71 +206,151 @@
               [class.input-error]="isBranchNameTaken"
               [(ngModel)]="nomeBranch"
               placeholder="Ex: Atualização PZZ"
+              maxlength="100"
               required
             />
           </div>
-          <span class="hint-text" *ngIf="!isBranchNameTaken">Nome gerado: <strong>{{ formattedBranchName || '...' }}</strong></span>
-          <span class="error-text" *ngIf="isBranchNameTaken" style="color: #d93025; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 4px;">
-            ⚠️ Já existe uma branch com este nome
-          </span>
+          @if (!isBranchNameTaken) {
+            <span class="hint-text"
+              >Nome gerado:
+              <strong>{{ formattedBranchName || "..." }}</strong></span
+            >
+          }
+          @if (isBranchNameTaken) {
+            <span
+              class="error-text"
+              style="
+                color: #d93025;
+                font-size: 13px;
+                font-weight: 500;
+                display: flex;
+                align-items: center;
+                gap: 4px;
+              "
+            >
+              ⚠️ Já existe uma branch com este nome
+            </span>
+          }
+          @if (nomeBranch && !isGeneratedNameValid) {
+            <span
+              class="error-text"
+              style="
+                color: #d93025;
+                font-size: 13px;
+                font-weight: 500;
+                display: flex;
+                align-items: center;
+                gap: 4px;
+              "
+            >
+              ⚠️ O nome deve conter letras ou números
+            </span>
+          }
         </div>
       </div>
 
       <!-- Área de Ação -->
       <div class="actions-section">
-        <!-- Disabled se o form for inválido, se branch name tiver conflito, ou se a branch pai não for válida -->
-        <button type="submit" class="btn btn-primary btn-large" [disabled]="branchForm.invalid || isBranchNameTaken || !isBranchPaiValid">
-          <span class="btn-text">Criar Branch</span>
+        <!-- Disabled se o form for inválido, se branch name tiver conflito, se a branch pai não for válida, ou nome gerado ficar vazio -->
+        <button
+          type="submit"
+          class="btn btn-primary btn-large"
+          [disabled]="
+            branchForm.invalid ||
+            isBranchNameTaken ||
+            !isBranchPaiValid ||
+            !isGeneratedNameValid ||
+            isCreatingBranch
+          "
+        >
+          <span class="btn-text">{{ isCreatingBranch ? 'Criando...' : 'Criar Branch' }}</span>
           <span class="btn-icon">🚀</span>
         </button>
       </div>
-
     </form>
   </div>
 </main>
 
 <!-- Settings Modal -->
-<div class="modal-overlay" *ngIf="showSettingsDialog">
-  <div class="modal-content">
-    <div class="modal-header">
-      <h3>Configurações</h3>
-      <button class="close-btn" (click)="closeSettings()">✖</button>
-    </div>
-    <div class="modal-body" style="padding-top: 24px;">
-      <button class="btn btn-secondary btn-large btn-danger-outline" (click)="openDeleteBranches()">
-        Apagar branches antigas
-      </button>
-    </div>
-  </div>
-</div>
-
-<!-- Delete Branches Modal -->
-<div class="modal-overlay" *ngIf="showDeleteBranchesDialog">
-  <div class="modal-content modal-large">
-    <div class="modal-header">
-      <h3>Apagar Branches Locais</h3>
-      <button class="close-btn" (click)="closeDeleteBranches()" [disabled]="isDeletingBranches">✖</button>
-    </div>
-    <div class="modal-body">
-      <p class="hint-text" style="margin-bottom: 16px;">Selecione as branches locais que deseja apagar (a branch atual está oculta por segurança).</p>
-
-      <div class="branches-list-container">
-        <div *ngIf="isLoadingLocalBranches" class="empty-state">Carregando branches locais...</div>
-        <div *ngIf="!isLoadingLocalBranches && localBranchesToDelete.length === 0" class="empty-state">
-          Nenhuma outra branch local encontrada.
-        </div>
-
-        <label *ngFor="let b of localBranchesToDelete" class="branch-checkbox-item">
-          <input type="checkbox" [(ngModel)]="b.selected" [disabled]="isDeletingBranches">
-          <span class="branch-name">{{ b.name }}</span>
-        </label>
+@if (showSettingsDialog) {
+  <div class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Configurações</h3>
+        <button class="close-btn" (click)="closeSettings()">✖</button>
+      </div>
+      <div class="modal-body" style="padding-top: 24px">
+        <button
+          class="btn btn-secondary btn-large btn-danger-outline"
+          (click)="openDeleteBranches()"
+        >
+          Apagar branches antigas
+        </button>
       </div>
     </div>
-    <div class="modal-footer">
-      <button class="btn btn-tonal" (click)="closeDeleteBranches()" [disabled]="isDeletingBranches">Cancelar</button>
-      <button class="btn btn-primary btn-danger" (click)="deleteSelectedBranches()" [disabled]="isDeletingBranches || localBranchesToDelete.length === 0">
-        {{ isDeletingBranches ? 'Apagando...' : 'Apagar branches selecionadas' }}
-      </button>
+  </div>
+}
+
+<!-- Delete Branches Modal -->
+@if (showDeleteBranchesDialog) {
+  <div class="modal-overlay">
+    <div class="modal-content modal-large">
+      <div class="modal-header">
+        <h3>Apagar Branches Locais</h3>
+        <button
+          class="close-btn"
+          (click)="closeDeleteBranches()"
+          [disabled]="isDeletingBranches"
+        >
+          ✖
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="hint-text" style="margin-bottom: 16px">
+          Selecione as branches locais que deseja apagar (a branch atual está
+          oculta por segurança).
+        </p>
+
+        <div class="branches-list-container">
+          @if (isLoadingLocalBranches) {
+            <div class="empty-state">Carregando branches locais...</div>
+          }
+          @if (!isLoadingLocalBranches && localBranchesToDelete.length === 0) {
+            <div class="empty-state">
+              Nenhuma outra branch local encontrada.
+            </div>
+          }
+
+          @for (b of localBranchesToDelete; track b.name) {
+            <label class="branch-checkbox-item">
+              <input
+                type="checkbox"
+                [(ngModel)]="b.selected"
+                [disabled]="isDeletingBranches"
+              />
+              <span class="branch-name">{{ b.name }}</span>
+            </label>
+          }
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button
+          class="btn btn-tonal"
+          (click)="closeDeleteBranches()"
+          [disabled]="isDeletingBranches"
+        >
+          Cancelar
+        </button>
+        <button
+          class="btn btn-primary btn-danger"
+          (click)="deleteSelectedBranches()"
+          [disabled]="isDeletingBranches || localBranchesToDelete.length === 0"
+        >
+          {{
+            isDeletingBranches ? "Apagando..." : "Apagar branches selecionadas"
+          }}
+        </button>
+      </div>
     </div>
   </div>
-</div>
+}

@@ -13,8 +13,9 @@
     "windows": [
       {
         "title": "Format Branch Name",
-        "width": 800,
-        "height": 900
+        "width": 750,
+        "height": 900,
+        "resizable": false
       }
     ],
     "security": {

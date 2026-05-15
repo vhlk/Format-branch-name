@@ -22,6 +22,7 @@
     },
     "log:default",
     "clipboard-manager:default",
-    "clipboard-manager:allow-write-text"
+    "clipboard-manager:allow-write-text",
+    "core:window:allow-set-size"
   ]
 }
