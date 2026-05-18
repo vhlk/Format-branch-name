@@ -3,7 +3,7 @@
 
 :host {
   display: block;
-  font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Roboto", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   color: #202124; /* Cinza bem escuro do Google */
   background-color: transparent; /* O fundo agora é controlado globalmente */
   height: 100%;
@@ -23,13 +23,17 @@
 .card-container {
   background-color: #ffffff;
   border-radius: 16px; /* Arredondamento moderno M3 */
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05), 0 1px 4px rgba(0, 0, 0, 0.02);
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.05),
+    0 1px 4px rgba(0, 0, 0, 0.02);
   width: 100%;
   max-width: 600px; /* Mais estreito para melhor leitura */
   margin: auto;
   display: flex;
   flex-direction: column;
-  transform: translateZ(0); /* Força a renderização em GPU para evitar ghosting/rastros de sombras na Webview */
+  transform: translateZ(
+    0
+  ); /* Força a renderização em GPU para evitar ghosting/rastros de sombras na Webview */
   will-change: transform;
 }
 
@@ -39,6 +43,7 @@
   background: linear-gradient(145deg, #f8faff 0%, #ffffff 100%);
   border-bottom: 1px solid #f1f3f4;
   text-align: center;
+  position: relative;
   flex-shrink: 0; /* Impede o cabeçalho de amassar caso haja scroll */
 }
 
@@ -135,7 +140,10 @@ legend {
   border: 1px solid transparent;
   border-radius: 8px;
   outline: none;
-  transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out, background-color 0.2s ease-in-out;
+  transition:
+    border-color 0.2s ease-in-out,
+    box-shadow 0.2s ease-in-out,
+    background-color 0.2s ease-in-out;
   box-sizing: border-box;
 }
 
@@ -180,7 +188,7 @@ legend {
 }
 
 .select-wrapper::after {
-  content: '▼';
+  content: "▼";
   font-size: 12px;
   color: #5f6368;
   position: absolute;
@@ -211,7 +219,7 @@ select.input-field:disabled {
   background-color: #ffffff;
   border: 1px solid #dadce0;
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   list-style: none;
   max-height: 200px;
   overflow-y: auto;
@@ -240,7 +248,6 @@ select.input-field:disabled {
   background-color: transparent;
 }
 
-
 /* Input + Botão (Procurar) */
 .folder-input-group {
   display: flex;
@@ -259,14 +266,37 @@ select.input-field:disabled {
 }
 
 .error-text {
-  animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+  animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
 }
 
 @keyframes shake {
-  10%, 90% { transform: translate3d(-1px, 0, 0); }
-  20%, 80% { transform: translate3d(2px, 0, 0); }
-  30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
-  40%, 60% { transform: translate3d(4px, 0, 0); }
+  10%,
+  90% {
+    transform: translate3d(-1px, 0, 0);
+  }
+  20%,
+  80% {
+    transform: translate3d(2px, 0, 0);
+  }
+  30%,
+  50%,
+  70% {
+    transform: translate3d(-4px, 0, 0);
+  }
+  40%,
+  60% {
+    transform: translate3d(4px, 0, 0);
+  }
+}
+
+/* Caixa de mensagem de erro */
+.error-message-box {
+  color: #d93025;
+  font-size: 13px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 /* Botões Modernos */
@@ -293,7 +323,7 @@ select.input-field:disabled {
 
 .btn-tonal:hover {
   background-color: #d2e3fc;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .btn-tonal:active {
@@ -304,7 +334,7 @@ select.input-field:disabled {
 .btn-primary {
   background-color: #1a73e8;
   color: #ffffff;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .btn-primary:hover:not(:disabled) {
@@ -438,7 +468,7 @@ select.input-field:disabled {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0,0,0,0.5);
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -451,7 +481,7 @@ select.input-field:disabled {
   border-radius: 12px;
   width: 90%;
   max-width: 400px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
   display: flex;
   flex-direction: column;
 }
@@ -557,8 +587,14 @@ select.input-field:disabled {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 /* Responsividade Básica */

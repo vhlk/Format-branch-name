@@ -1,6 +1,6 @@
-<main class="app-wrapper">
-  <div class="card-container">
-    <div class="header-section" style="position: relative">
+<main class="app-wrapper" #appWrapper>
+  <div class="card-container" #cardContainer>
+    <div class="header-section">
       <button
         type="button"
         class="icon-btn settings-btn"
@@ -120,17 +120,7 @@
             }
           </div>
           @if (selectedDropdownValue && !isBranchPaiValid && !showDropdown) {
-            <span
-              class="error-text"
-              style="
-                color: #d93025;
-                font-size: 13px;
-                font-weight: 500;
-                display: flex;
-                align-items: center;
-                gap: 4px;
-              "
-            >
+            <span class="error-text error-message-box">
               ⚠️ Selecione uma branch válida da lista
             </span>
           }
@@ -217,32 +207,12 @@
             >
           }
           @if (isBranchNameTaken) {
-            <span
-              class="error-text"
-              style="
-                color: #d93025;
-                font-size: 13px;
-                font-weight: 500;
-                display: flex;
-                align-items: center;
-                gap: 4px;
-              "
-            >
+            <span class="error-text error-message-box">
               ⚠️ Já existe uma branch com este nome
             </span>
           }
           @if (nomeBranch && !isGeneratedNameValid) {
-            <span
-              class="error-text"
-              style="
-                color: #d93025;
-                font-size: 13px;
-                font-weight: 500;
-                display: flex;
-                align-items: center;
-                gap: 4px;
-              "
-            >
+            <span class="error-text error-message-box">
               ⚠️ O nome deve conter letras ou números
             </span>
           }
@@ -263,7 +233,9 @@
             isCreatingBranch
           "
         >
-          <span class="btn-text">{{ isCreatingBranch ? 'Criando...' : 'Criar Branch' }}</span>
+          <span class="btn-text">{{
+            isCreatingBranch ? "Criando..." : "Criar Branch"
+          }}</span>
           <span class="btn-icon">🚀</span>
         </button>
       </div>
@@ -281,7 +253,7 @@
       </div>
       <div class="modal-body" style="padding-top: 24px">
         <button
-          class="btn btn-secondary btn-large btn-danger-outline"
+          class="btn btn-large btn-danger-outline"
           (click)="openDeleteBranches()"
         >
           Apagar branches antigas
