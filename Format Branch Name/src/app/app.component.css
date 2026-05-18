@@ -1,10 +1,24 @@
-/* Arquivo de estilo do componente.
-   As fontes e reset global foram movidos para styles.css para evitar avisos de budget do Angular. */
+/* Arquivo de estilo do componente. */
 
 :host {
+  --color-primary: #1a73e8;
+  --color-primary-tonal-bg: #e8f0fe;
+  --color-primary-tonal-fg: #1967d2;
+  --color-text-primary: #202124;
+  --color-text-secondary: #5f6368;
+  --color-text-disabled: #80868b;
+  --color-surface: #ffffff;
+  --color-surface-variant: #f8f9fa;
+  --color-surface-hover: #f1f3f4;
+  --color-border: #dadce0;
+  --color-border-light: #f1f3f4;
+  --color-error: #d93025;
+  --color-error-bg: #fce8e6;
+  --shadow-elevation-1: 0 4px 12px rgba(0, 0, 0, 0.05), 0 1px 4px rgba(0, 0, 0, 0.02);
+
   display: block;
   font-family: "Roboto", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  color: #202124; /* Cinza bem escuro do Google */
+  color: var(--color-text-primary);
   background-color: transparent; /* O fundo agora é controlado globalmente */
   height: 100%;
   width: 100%;
@@ -21,11 +35,9 @@
 
 /* O Card Principal - Elevação e Elegância */
 .card-container {
-  background-color: #ffffff;
+  background-color: var(--color-surface);
   border-radius: 16px; /* Arredondamento moderno M3 */
-  box-shadow:
-    0 4px 12px rgba(0, 0, 0, 0.05),
-    0 1px 4px rgba(0, 0, 0, 0.02);
+  box-shadow: var(--shadow-elevation-1);
   width: 100%;
   max-width: 600px; /* Mais estreito para melhor leitura */
   margin: auto;
@@ -40,8 +52,8 @@
 /* Cabeçalho */
 .header-section {
   padding: 32px 32px 16px;
-  background: linear-gradient(145deg, #f8faff 0%, #ffffff 100%);
-  border-bottom: 1px solid #f1f3f4;
+  background: linear-gradient(145deg, var(--color-primary-tonal-bg) 0%, var(--color-surface) 100%);
+  border-bottom: 1px solid var(--color-border-light);
   text-align: center;
   position: relative;
   flex-shrink: 0; /* Impede o cabeçalho de amassar caso haja scroll */
@@ -51,14 +63,14 @@ h1 {
   margin: 0 0 8px 0;
   font-size: 28px;
   font-weight: 700;
-  color: #1a73e8; /* Azul principal */
+  color: var(--color-primary);
   letter-spacing: -0.5px;
 }
 
 .subtitle {
   margin: 0;
   font-size: 15px;
-  color: #5f6368;
+  color: var(--color-text-secondary);
   font-weight: 400;
 }
 
@@ -87,9 +99,9 @@ h1 {
   font-size: 13px;
   text-transform: uppercase;
   letter-spacing: 1px;
-  color: #80868b;
+  color: var(--color-text-disabled);
   font-weight: 700;
-  border-bottom: 2px solid #f1f3f4;
+  border-bottom: 2px solid var(--color-border-light);
   padding-bottom: 8px;
 }
 
@@ -111,7 +123,7 @@ label,
 legend {
   font-size: 14px;
   font-weight: 500;
-  color: #3c4043;
+  color: var(--color-text-primary);
   padding: 0;
 }
 
@@ -125,7 +137,7 @@ legend {
 .material-icon {
   position: absolute;
   left: 12px;
-  color: #9aa0a6;
+  color: var(--color-text-disabled);
   font-size: 16px;
   pointer-events: none;
 }
@@ -135,8 +147,8 @@ legend {
   padding: 14px 16px;
   font-size: 16px;
   line-height: 1.5;
-  color: #202124;
-  background-color: #f8f9fa;
+  color: var(--color-text-primary);
+  background-color: var(--color-surface-variant);
   border: 1px solid transparent;
   border-radius: 8px;
   outline: none;
@@ -152,17 +164,17 @@ legend {
 }
 
 .input-field:hover:not(:read-only):not(:disabled) {
-  background-color: #f1f3f4;
+  background-color: var(--color-surface-hover);
 }
 
 .input-field:focus {
-  background-color: #ffffff;
-  border-color: #1a73e8;
+  background-color: var(--color-surface);
+  border-color: var(--color-primary);
   box-shadow: 0 0 0 4px rgba(26, 115, 232, 0.15);
 }
 
 .input-field:read-only {
-  color: #5f6368;
+  color: var(--color-text-secondary);
   cursor: default;
 }
 
@@ -174,8 +186,8 @@ legend {
 
 /* Estilo de erro para o input */
 .input-field.input-error {
-  border-color: #d93025;
-  background-color: #fce8e6;
+  border-color: var(--color-error);
+  background-color: var(--color-error-bg);
 }
 
 .input-field.input-error:focus {
@@ -190,7 +202,7 @@ legend {
 .select-wrapper::after {
   content: "▼";
   font-size: 12px;
-  color: #5f6368;
+  color: var(--color-text-secondary);
   position: absolute;
   right: 16px;
   top: 50%;
@@ -216,8 +228,8 @@ select.input-field:disabled {
   right: 0;
   margin: 4px 0 0;
   padding: 8px 0;
-  background-color: #ffffff;
-  border: 1px solid #dadce0;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   list-style: none;
@@ -229,17 +241,17 @@ select.input-field:disabled {
 .autocomplete-item {
   padding: 10px 16px;
   font-size: 14px;
-  color: #202124;
+  color: var(--color-text-primary);
   cursor: pointer;
   transition: background-color 0.2s;
 }
 
 .autocomplete-item:hover {
-  background-color: #f1f3f4;
+  background-color: var(--color-surface-hover);
 }
 
 .autocomplete-item.empty-state {
-  color: #5f6368;
+  color: var(--color-text-secondary);
   font-style: italic;
   cursor: default;
 }
@@ -261,7 +273,7 @@ select.input-field:disabled {
 /* Dica de texto */
 .hint-text {
   font-size: 13px;
-  color: #5f6368;
+  color: var(--color-text-secondary);
   margin-top: 2px;
 }
 
@@ -291,7 +303,7 @@ select.input-field:disabled {
 
 /* Caixa de mensagem de erro */
 .error-message-box {
-  color: #d93025;
+  color: var(--color-error);
   font-size: 13px;
   font-weight: 500;
   display: flex;
@@ -317,8 +329,8 @@ select.input-field:disabled {
 
 /* Botão Secundário (Tonal - Material 3 style) */
 .btn-tonal {
-  background-color: #e8f0fe;
-  color: #1967d2;
+  background-color: var(--color-primary-tonal-bg);
+  color: var(--color-primary-tonal-fg);
 }
 
 .btn-tonal:hover {
@@ -332,8 +344,8 @@ select.input-field:disabled {
 
 /* Botão Primário */
 .btn-primary {
-  background-color: #1a73e8;
-  color: #ffffff;
+  background-color: var(--color-primary);
+  color: var(--color-surface);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
@@ -351,7 +363,7 @@ select.input-field:disabled {
 
 .btn-primary:disabled {
   background-color: #cccccc;
-  color: #ffffff;
+  color: var(--color-surface);
   box-shadow: none;
   cursor: not-allowed;
   opacity: 0.7;
@@ -392,21 +404,21 @@ select.input-field:disabled {
   justify-content: center;
   gap: 8px;
   padding: 16px 8px;
-  background-color: #ffffff;
-  border: 1px solid #dadce0;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   transition: all 0.2s ease;
 }
 
 .radio-card:hover .card-content {
-  background-color: #f8faff;
+  background-color: var(--color-primary-tonal-bg);
   border-color: #d2e3fc;
 }
 
 /* Estado Selecionado */
 .radio-card.selected .card-content {
-  background-color: #e8f0fe;
-  border-color: #1a73e8;
+  background-color: var(--color-primary-tonal-bg);
+  border-color: var(--color-primary);
   border-width: 2px;
   padding: 15px 7px; /* Compensa a borda de 2px para não pular */
 }
@@ -427,11 +439,11 @@ select.input-field:disabled {
 .radio-card .label-text {
   font-size: 14px;
   font-weight: 500;
-  color: #5f6368;
+  color: var(--color-text-secondary);
 }
 
 .radio-card.selected .label-text {
-  color: #1a73e8;
+  color: var(--color-primary);
   font-weight: 700;
 }
 
@@ -459,7 +471,7 @@ select.input-field:disabled {
 }
 
 .settings-btn:hover {
-  background-color: #f1f3f4;
+  background-color: var(--color-surface-hover);
 }
 
 .modal-overlay {
@@ -477,7 +489,7 @@ select.input-field:disabled {
 }
 
 .modal-content {
-  background-color: #ffffff;
+  background-color: var(--color-surface);
   border-radius: 12px;
   width: 90%;
   max-width: 400px;
@@ -493,7 +505,7 @@ select.input-field:disabled {
 
 .modal-header {
   padding: 20px 24px;
-  border-bottom: 1px solid #f1f3f4;
+  border-bottom: 1px solid var(--color-border-light);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -502,7 +514,7 @@ select.input-field:disabled {
 .modal-header h3 {
   margin: 0;
   font-size: 18px;
-  color: #202124;
+  color: var(--color-text-primary);
 }
 
 .close-btn {
@@ -510,11 +522,11 @@ select.input-field:disabled {
   border: none;
   font-size: 18px;
   cursor: pointer;
-  color: #5f6368;
+  color: var(--color-text-secondary);
 }
 
 .close-btn:hover {
-  color: #202124;
+  color: var(--color-text-primary);
 }
 
 .modal-body {
@@ -524,7 +536,7 @@ select.input-field:disabled {
 
 .modal-footer {
   padding: 16px 24px;
-  border-top: 1px solid #f1f3f4;
+  border-top: 1px solid var(--color-border-light);
   display: flex;
   justify-content: flex-end;
   gap: 12px;
@@ -532,17 +544,17 @@ select.input-field:disabled {
 
 /* Custom danger button */
 .btn-danger-outline {
-  background-color: #ffffff;
-  color: #d93025 !important;
-  border: 1px solid #d93025;
+  background-color: var(--color-surface);
+  color: var(--color-error) !important;
+  border: 1px solid var(--color-error);
 }
 
 .btn-danger-outline:hover {
-  background-color: #fce8e6 !important;
+  background-color: var(--color-error-bg) !important;
 }
 
 .btn-danger {
-  background-color: #d93025 !important;
+  background-color: var(--color-error) !important;
 }
 
 .btn-danger:hover:not(:disabled) {
@@ -550,7 +562,7 @@ select.input-field:disabled {
 }
 
 .branches-list-container {
-  border: 1px solid #dadce0;
+  border: 1px solid var(--color-border);
   border-radius: 8px;
   max-height: 300px;
   overflow-y: auto;
@@ -561,7 +573,7 @@ select.input-field:disabled {
   align-items: center;
   padding: 12px 16px;
   gap: 12px;
-  border-bottom: 1px solid #f1f3f4;
+  border-bottom: 1px solid var(--color-border-light);
   cursor: pointer;
 }
 
@@ -570,7 +582,7 @@ select.input-field:disabled {
 }
 
 .branch-checkbox-item:hover {
-  background-color: #f8f9fa;
+  background-color: var(--color-surface-variant);
 }
 
 .branch-checkbox-item input[type="checkbox"] {
@@ -582,7 +594,7 @@ select.input-field:disabled {
 .empty-state {
   padding: 24px;
   text-align: center;
-  color: #5f6368;
+  color: var(--color-text-secondary);
   font-style: italic;
 }
 
@@ -610,4 +622,23 @@ select.input-field:disabled {
   .btn-tonal {
     width: 100%;
   }
+}
+
+/* --- Marca d'água de Créditos (Material 3 Label Small) --- */
+.credit-text {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-text-disabled);
+  letter-spacing: 0.5px; /* Padrão de tracking do M3 para Label Small */
+  z-index: 100;
+  user-select: none;
+  text-decoration: none;
+  transition: color 0.2s cubic-bezier(0.4, 0, 0.2, 1); /* Curva padrão do Material Design */
+}
+
+.credit-text:hover {
+  color: var(--color-text-secondary);
 }
