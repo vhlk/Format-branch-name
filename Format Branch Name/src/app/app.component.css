@@ -80,10 +80,6 @@ h1 {
   display: flex;
   flex-direction: column;
   gap: 24px;
-  /* Mudança Crítica: Permitir que o form-content cresça, mas remover o overflow-y: auto isolado
-     para que o menu do autocompletar não crie um scroll interno escondido.
-     O scroll agora pode ser gerenciado de forma mais inteligente se necessário,
-     mas para o autocomplete flutuar livremente, o overflow não pode clipar os absolutos. */
   overflow: visible;
   flex-grow: 1;
 }
@@ -180,7 +176,7 @@ legend {
 
 .input-field:disabled {
   background-color: #e9ecef;
-  color: #adb5bd;
+  color: var(--color-text-secondary);
   cursor: not-allowed;
 }
 
@@ -636,7 +632,7 @@ select.input-field:disabled {
   z-index: 100;
   user-select: none;
   text-decoration: none;
-  transition: color 0.2s cubic-bezier(0.4, 0, 0.2, 1); /* Curva padrão do Material Design */
+  transition: color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .credit-text:hover {

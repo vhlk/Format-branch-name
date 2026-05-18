@@ -15,7 +15,7 @@ import {
   confirm as tauriConfirm,
 } from "@tauri-apps/plugin-dialog";
 import { Command } from "@tauri-apps/plugin-shell";
-import { info, error } from "@tauri-apps/plugin-log";
+import { info, error, warn } from "@tauri-apps/plugin-log";
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
 import { getCurrentWindow, LogicalSize } from "@tauri-apps/api/window";
 
@@ -65,9 +65,10 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private resizeObserver?: ResizeObserver;
   private resizeTimeout?: ReturnType<typeof setTimeout>; // Armazena o timer do debounce
+  private hideDropdownTimeout?: ReturnType<typeof setTimeout>;
 
   ngOnInit() {
-    const savedFolder = localStorage.getItem("lastSelectedFolder");
+    const savedFolder = this.getSavedFolder();
     if (savedFolder) {
       this.selectedFolder = savedFolder;
       this.loadRemoteBranches(savedFolder);
@@ -136,6 +137,33 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnDestroy() {
     this.resizeObserver?.disconnect();
     if (this.resizeTimeout) clearTimeout(this.resizeTimeout);
+    if (this.hideDropdownTimeout) clearTimeout(this.hideDropdownTimeout);
+  }
+
+  // --- Utilitários Seguros de Local Storage ---
+  private getSavedFolder(): string | null {
+    try {
+      return localStorage.getItem("lastSelectedFolder");
+    } catch (e) {
+      warn("Acesso ao localStorage negado: " + e);
+      return null;
+    }
+  }
+
+  private saveFolder(folder: string): void {
+    try {
+      localStorage.setItem("lastSelectedFolder", folder);
+    } catch (e) {
+      warn("Acesso ao localStorage negado: " + e);
+    }
+  }
+
+  private clearSavedFolder(): void {
+    try {
+      localStorage.removeItem("lastSelectedFolder");
+    } catch (e) {
+      warn("Acesso ao localStorage negado: " + e);
+    }
   }
 
   protected async onChooseFolder() {
@@ -150,7 +178,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
       // Atualiza o valor do input se o usuário selecionou algo
       if (selected !== null && !Array.isArray(selected)) {
         this.selectedFolder = selected;
-        localStorage.setItem("lastSelectedFolder", selected);
+        this.saveFolder(selected);
         await this.loadRemoteBranches(selected);
       }
     } catch (err) {
@@ -183,7 +211,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
           { title: "Aviso", kind: "warning" },
         );
         this.selectedFolder = "";
-        localStorage.removeItem("lastSelectedFolder");
+        this.clearSavedFolder();
         return;
       }
 
@@ -205,7 +233,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
         { title: "Erro", kind: "error" },
       );
       this.selectedFolder = "";
-      localStorage.removeItem("lastSelectedFolder");
+      this.clearSavedFolder();
     } finally {
       this.isLoadingBranches = false;
     }
@@ -246,7 +274,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
       },
     );
     this.selectedFolder = "";
-    localStorage.removeItem("lastSelectedFolder");
+    this.clearSavedFolder();
     return null;
   }
 
@@ -398,7 +426,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
           { title: "Erro", kind: "error" },
         );
         // Atualiza a lista pra mostrar o que sobrou
-        this.openDeleteBranches();
+        await this.openDeleteBranches();
       }
     } catch (err) {
       error(`Erro ao deletar branches: ${err}`);
@@ -417,8 +445,8 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
       text
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "")
-        .replace(/[^\w\s\-/]/g, "")
         .trim()
+        .replace(/[^\w\s\-/]/g, "")
         .replace(/\s+/g, "-")
         .replace(/-+/g, "-")
         // Garante que não haja múltiplas barras e retira barras/hífens sobrando nas bordas
@@ -451,7 +479,10 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   protected hideDropdown() {
     // Aguarda o processamento de possíveis eventos de click nas opções do Dropdown
     // antes de destruí-lo do DOM através do evento `blur`.
-    setTimeout(() => {
+    if (this.hideDropdownTimeout) {
+      clearTimeout(this.hideDropdownTimeout);
+    }
+    this.hideDropdownTimeout = setTimeout(() => {
       this.showDropdown = false;
     }, 150);
   }
