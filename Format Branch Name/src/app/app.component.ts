@@ -93,9 +93,11 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
           // Obtém dinamicamente os valores de padding do wrapper para não usar valores fixos
           const wrapperStyle = globalThis.getComputedStyle(appWrapper);
           const paddingTop = Number.parseFloat(wrapperStyle.paddingTop) || 0;
-          const paddingBottom = Number.parseFloat(wrapperStyle.paddingBottom) || 0;
+          const paddingBottom =
+            Number.parseFloat(wrapperStyle.paddingBottom) || 0;
           const paddingLeft = Number.parseFloat(wrapperStyle.paddingLeft) || 0;
-          const paddingRight = Number.parseFloat(wrapperStyle.paddingRight) || 0;
+          const paddingRight =
+            Number.parseFloat(wrapperStyle.paddingRight) || 0;
 
           // A janela do SO possui bordas e barra de título (Windows/macOS chrome).
           // Se não somarmos essa diferença, a barra de título "roubará" o espaço da interface e cortará o final do App.
@@ -335,7 +337,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
 
       if (isRemote) {
         const existing = this.branchBaseMapping.get(cleanName);
-        if (!existing || !existing.startsWith("remotes/origin/")) {
+        if (!existing?.startsWith("remotes/origin/")) {
           this.branchBaseMapping.set(cleanName, original);
         }
       }
@@ -525,7 +527,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "")
         .trim()
-        .replace(/[^\w\s\-\/.]/g, "")
+        .replace(/[^\w\s\-/.]/g, "")
         .replace(/\s+/g, "-")
         .replace(/-+/g, "-")
         // Garante que não haja múltiplas barras e retira barras/hífens sobrando nas bordas
@@ -536,7 +538,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
         .replace(/-?\/-?/g, "/")
         // O Git não aceita componentes da branch que iniciam com ponto (ex: feature/.teste)
         .replace(/\/\.+/g, "/")
-        .replace(/^[-\/.]+|[-\/.]+$/g, "")
+        .replace(/^[-/.]+|[-/.]+$/g, "")
         .toLowerCase()
         // Git não permite nomes de branch terminando com .lock
         .replace(/(?:\.lock)+$/g, "")
