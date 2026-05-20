@@ -47,6 +47,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // Guarda todas as branches (locais e remotas) para validação
   allBranches: Set<string> = new Set();
+  allBranchesLower: Set<string> = new Set();
 
   // Mapeia o nome de exibição para a referência remota (se existir)
   branchBaseMapping: Map<string, string> = new Map();
@@ -66,6 +67,10 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   private resizeObserver?: ResizeObserver;
   private resizeTimeout?: ReturnType<typeof setTimeout>; // Armazena o timer do debounce
   private hideDropdownTimeout?: ReturnType<typeof setTimeout>;
+
+  // Evita loops infinitos de redimensionamento da janela
+  private lastAppliedWidth: number = 0;
+  private lastAppliedHeight: number = 0;
 
   ngOnInit() {
     const savedFolder = this.getSavedFolder();
@@ -87,10 +92,10 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
         this.resizeTimeout = setTimeout(async () => {
           // Obtém dinamicamente os valores de padding do wrapper para não usar valores fixos
           const wrapperStyle = globalThis.getComputedStyle(appWrapper);
-          const paddingTop = Number.parseFloat(wrapperStyle.paddingTop);
-          const paddingBottom = Number.parseFloat(wrapperStyle.paddingBottom);
-          const paddingLeft = Number.parseFloat(wrapperStyle.paddingLeft);
-          const paddingRight = Number.parseFloat(wrapperStyle.paddingRight);
+          const paddingTop = Number.parseFloat(wrapperStyle.paddingTop) || 0;
+          const paddingBottom = Number.parseFloat(wrapperStyle.paddingBottom) || 0;
+          const paddingLeft = Number.parseFloat(wrapperStyle.paddingLeft) || 0;
+          const paddingRight = Number.parseFloat(wrapperStyle.paddingRight) || 0;
 
           // A janela do SO possui bordas e barra de título (Windows/macOS chrome).
           // Se não somarmos essa diferença, a barra de título "roubará" o espaço da interface e cortará o final do App.
@@ -115,13 +120,21 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
             card.scrollHeight + paddingTop + paddingBottom;
 
           try {
-            // Somamos o espaço do "chrome" da janela para garantir que a área útil interna seja exata
-            await getCurrentWindow().setSize(
-              new LogicalSize(
-                targetInnerWidth + chromeWidth,
-                targetInnerHeight + chromeHeight,
-              ),
-            );
+            const finalWidth = targetInnerWidth + chromeWidth;
+            const finalHeight = targetInnerHeight + chromeHeight;
+
+            // Aplica a tolerância de 1px para evitar loops infinitos (jittering)
+            if (
+              Math.abs(this.lastAppliedWidth - finalWidth) > 1 ||
+              Math.abs(this.lastAppliedHeight - finalHeight) > 1
+            ) {
+              this.lastAppliedWidth = finalWidth;
+              this.lastAppliedHeight = finalHeight;
+
+              await getCurrentWindow().setSize(
+                new LogicalSize(finalWidth, finalHeight),
+              );
+            }
           } catch (err) {
             console.error(
               "Falha ao redimensionar a janela nativa via Tauri:",
@@ -167,6 +180,16 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   protected async onChooseFolder() {
+    if (
+      this.isLoadingBranches ||
+      this.isCreatingBranch ||
+      this.isDeletingBranches ||
+      this.showDeleteBranchesDialog ||
+      this.showSettingsDialog
+    ) {
+      return;
+    }
+
     try {
       // Abre a janela nativa do sistema para escolher uma pasta
       const selected = await open({
@@ -195,13 +218,14 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     this.filteredDropdownValues = [];
     this.selectedDropdownValue = "";
     this.allBranches.clear();
+    this.allBranchesLower.clear();
     this.branchBaseMapping.clear();
 
     try {
       // Verifica se é um repositório git válido antes de executar os comandos pesados
       const statusCmd = Command.create("git", ["status"], {
         cwd: directory,
-        env: { LC_ALL: "C" },
+        env: { LC_ALL: "C", GIT_TERMINAL_PROMPT: "0" },
       });
       const statusOutput = await statusCmd.execute();
 
@@ -242,18 +266,32 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   private async fetchAndPrune(directory: string): Promise<void> {
     const fetchCmd = Command.create("git", ["fetch", "--all", "--prune"], {
       cwd: directory,
-      env: { LC_ALL: "C" },
+      env: {
+        LC_ALL: "C",
+        GIT_TERMINAL_PROMPT: "0",
+        GIT_SSH_COMMAND: "ssh -o BatchMode=yes",
+      },
     });
-    await fetchCmd.execute();
+    const output = await fetchCmd.execute();
+
+    if (output.code !== 0) {
+      warn(
+        `Falha ao sincronizar com o repositório remoto (modo offline ou auth pendente).\nErro: ${output.stderr}`,
+      );
+      await message(
+        `Falha ao sincronizar com o repositório remoto.\nErro: ${output.stderr}`,
+        { title: "Erro", kind: "warning" },
+      );
+    }
   }
 
   private async getAllGitBranches(directory: string): Promise<string[] | null> {
     const allBranchesCmd = Command.create(
       "git",
-      ["branch", "-a", "--no-color"],
+      ["-c", "core.quotePath=false", "branch", "-a", "--no-color"],
       {
         cwd: directory,
-        env: { LC_ALL: "C" },
+        env: { LC_ALL: "C", GIT_TERMINAL_PROMPT: "0" },
       },
     );
     const output = await allBranchesCmd.execute();
@@ -261,7 +299,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     if (output.code === 0) {
       return output.stdout
         .split("\n")
-        .map((b) => b.replace(/^\*?\s+/, "").trim())
+        .map((b) => b.replace(/^[*+]?\s+/, "").trim())
         .filter((b) => b.length > 0 && !b.includes("->"));
     }
 
@@ -284,35 +322,39 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   ): void {
     rawBranches.forEach((original) => {
       let cleanName = original;
+      const isRemote = original.startsWith("remotes/");
 
-      // Limpa "remotes/origin/branch-name" para "branch-name"
-      if (original.startsWith("remotes/")) {
+      if (isRemote) {
         const parts = original.split("/");
-        parts.splice(0, 2); // Remove 'remotes' e o nome do remote
+        parts.splice(0, 2);
         cleanName = parts.join("/");
       }
 
       this.allBranches.add(cleanName);
+      this.allBranchesLower.add(cleanName.toLowerCase());
 
-      // Guarda o map de nome simplificado para o remote, se tiver
-      if (
-        !this.branchBaseMapping.has(cleanName) ||
-        original.startsWith("remotes/")
-      ) {
-        this.branchBaseMapping.set(cleanName, original);
+      if (isRemote) {
+        const existing = this.branchBaseMapping.get(cleanName);
+        if (!existing || !existing.startsWith("remotes/origin/")) {
+          this.branchBaseMapping.set(cleanName, original);
+        }
       }
     });
 
-    const remotas = Array.from(this.allBranches).filter((branch) =>
-      this.branchBaseMapping.get(branch)?.startsWith("remotes/"),
-    );
+    // Garante que o dropdown exiba única e exclusivamente as branches remotas mapeadas
+    const remotas = Array.from(this.branchBaseMapping.keys());
 
     this.dropdownValues = remotas;
-    this.filteredDropdownValues = [...remotas];
 
     this.selectedDropdownValue = remotas.includes(previousSelection)
       ? previousSelection
       : "";
+
+    if (this.selectedDropdownValue) {
+      this.filterBranches();
+    } else {
+      this.filteredDropdownValues = [...remotas];
+    }
   }
 
   // Settings & Delete Branches Logic
@@ -325,6 +367,14 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   protected async openDeleteBranches() {
+    if (
+      this.isLoadingLocalBranches ||
+      this.isDeletingBranches ||
+      this.isLoadingBranches
+    ) {
+      return;
+    }
+
     if (!this.selectedFolder) {
       await message("Selecione um projeto primeiro!", {
         title: "Aviso",
@@ -340,10 +390,14 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
 
     try {
       // Executa git branch para listar apenas branches locais
-      const localBranchesCmd = Command.create("git", ["branch", "--no-color"], {
-        cwd: this.selectedFolder,
-        env: { LC_ALL: "C" },
-      });
+      const localBranchesCmd = Command.create(
+        "git",
+        ["-c", "core.quotePath=false", "branch", "--no-color"],
+        {
+          cwd: this.selectedFolder,
+          env: { LC_ALL: "C", GIT_TERMINAL_PROMPT: "0" },
+        },
+      );
       const output = await localBranchesCmd.execute();
 
       if (output.code === 0) {
@@ -351,8 +405,11 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
           .split("\n")
           // Filtra linhas em branco
           .filter((b) => b.trim().length > 0)
-          // Filtra a branch atual que começa com asterisco '*' (eq. grep -v '^*')
-          .filter((b) => !b.trim().startsWith("*"))
+          // Ignora a branch ativa ('*') e worktrees vinculados ('+'). O Git proíbe a exclusão de ambos.
+          .filter((b) => {
+            const clean = b.trim();
+            return !clean.startsWith("*") && !clean.startsWith("+");
+          })
           .map((b) => ({
             name: b.trim(),
             selected: false,
@@ -381,6 +438,8 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   protected async deleteSelectedBranches() {
+    if (this.isDeletingBranches) return;
+
     const branchesToDelete = this.localBranchesToDelete
       .filter((b) => b.selected)
       .map((b) => b.name);
@@ -393,40 +452,60 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    // Confirmação para evitar desastres
-    const isConfirmed = await tauriConfirm(
-      `Tem certeza que deseja apagar ${branchesToDelete.length} branch(es) local(is)?`,
-      { title: "Confirmação", kind: "warning" },
-    );
-    if (!isConfirmed) {
-      return;
-    }
-
     this.isDeletingBranches = true;
 
     try {
-      // Executa git branch -D branch1 branch2 ...
-      const deleteCmd = Command.create(
-        "git",
-        ["branch", "-D", "--", ...branchesToDelete],
-        { cwd: this.selectedFolder, env: { LC_ALL: "C" } },
+      // Confirmação para evitar desastres
+      const isConfirmed = await tauriConfirm(
+        `Tem certeza que deseja apagar ${branchesToDelete.length} branch(es) local(is)?`,
+        { title: "Confirmação", kind: "warning" },
       );
-      const output = await deleteCmd.execute();
+      if (!isConfirmed) {
+        return;
+      }
 
-      if (output.code === 0) {
+      let hasErrors = false;
+      let combinedStderr = "";
+      const chunkSize = 50; // Previne o erro E2BIG de limite de comprimento do console no SO
+
+      for (let i = 0; i < branchesToDelete.length; i += chunkSize) {
+        const chunk = branchesToDelete.slice(i, i + chunkSize);
+        const deleteCmd = Command.create(
+          "git",
+          ["branch", "-D", "--", ...chunk],
+          {
+            cwd: this.selectedFolder,
+            env: { LC_ALL: "C", GIT_TERMINAL_PROMPT: "0" },
+          },
+        );
+        const output = await deleteCmd.execute();
+
+        if (output.code !== 0) {
+          hasErrors = true;
+          combinedStderr += output.stderr + "\n";
+        }
+      }
+
+      if (hasErrors) {
+        await message(
+          `Ocorreram erros ao apagar algumas branches:\n${combinedStderr}`,
+          { title: "Erro", kind: "error" },
+        );
+
+        this.isDeletingBranches = false;
+
+        await this.openDeleteBranches();
+
+        await this.loadRemoteBranches(this.selectedFolder);
+      } else {
         await message("Branches apagadas com sucesso!", {
           title: "Sucesso",
           kind: "info",
         });
         // Fecha o modal e atualiza a lista se a pessoa quiser abrir de novo
         this.closeDeleteBranches();
-      } else {
-        await message(
-          `Ocorreram erros ao apagar algumas branches:\n${output.stderr}`,
-          { title: "Erro", kind: "error" },
-        );
-        // Atualiza a lista pra mostrar o que sobrou
-        await this.openDeleteBranches();
+        // Recarrega o estado para limpar as branches locais deletadas da memória (this.allBranches)
+        await this.loadRemoteBranches(this.selectedFolder);
       }
     } catch (err) {
       error(`Erro ao deletar branches: ${err}`);
@@ -446,18 +525,29 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "")
         .trim()
-        .replace(/[^\w\s\-/]/g, "")
+        .replace(/[^\w\s\-\/.]/g, "")
         .replace(/\s+/g, "-")
         .replace(/-+/g, "-")
         // Garante que não haja múltiplas barras e retira barras/hífens sobrando nas bordas
         .replace(/\/+/g, "/")
-        .replace(/^[-/]+|[-/]+$/g, "")
+        // Git proíbe sequências de pontos (ex: ..)
+        .replace(/\.{2,}/g, ".")
+        // O Git não aceita componentes da branch que começam com hífen (ex: feature/-teste)
+        .replace(/-?\/-?/g, "/")
+        // O Git não aceita componentes da branch que iniciam com ponto (ex: feature/.teste)
+        .replace(/\/\.+/g, "/")
+        .replace(/^[-\/.]+|[-\/.]+$/g, "")
         .toLowerCase()
+        // Git não permite nomes de branch terminando com .lock
+        .replace(/(?:\.lock)+$/g, "")
     );
   }
 
   // Autocomplete methods
   protected filterBranches() {
+    if (this.hideDropdownTimeout) {
+      clearTimeout(this.hideDropdownTimeout);
+    }
     this.showDropdown = true;
 
     const searchTerm = (this.selectedDropdownValue || "").trim().toLowerCase();
@@ -472,8 +562,12 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   protected selectBranch(branch: string) {
+    if (this.hideDropdownTimeout) {
+      clearTimeout(this.hideDropdownTimeout);
+    }
     this.selectedDropdownValue = branch;
     this.showDropdown = false;
+    this.filterBranches(); // Recalcula o filtro para alinhar os estados
   }
 
   protected hideDropdown() {
@@ -484,7 +578,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     this.hideDropdownTimeout = setTimeout(() => {
       this.showDropdown = false;
-    }, 150);
+    }, 250); // Aumentado para 250ms para evitar interrupções de cliques um pouco mais lentos
   }
 
   protected get isBranchPaiValid(): boolean {
@@ -504,8 +598,8 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   protected get isGeneratedNameValid(): boolean {
     if (!this.nomeBranch) return false;
 
-    const parts = this.formattedBranchName.split("/");
-    return parts.length > 1 && parts[1].trim().length > 0;
+    const cleanText = this.cleanStringForBranch(this.nomeBranch);
+    return cleanText.length > 0;
   }
 
   // Verifica se o nome da branch já existe
@@ -513,14 +607,16 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!this.nomeBranch || !this.formattedBranchName) return false;
 
     const targetName = this.formattedBranchName; // lowercase
-    return Array.from(this.allBranches).some(
-      (branch) => branch.toLowerCase() === targetName,
-    );
+    return this.allBranchesLower.has(targetName);
   }
 
   async onSubmit() {
     // Previne envio múltiplo caso o usuário clique duas vezes rapidamente
-    if (this.isCreatingBranch || this.isLoadingBranches) {
+    if (
+      this.isCreatingBranch ||
+      this.isLoadingBranches ||
+      this.isDeletingBranches
+    ) {
       return;
     }
 
@@ -554,11 +650,17 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
       const mudarDeBranch = await this.confirmBranchChange(branchName, copied);
 
       if (mudarDeBranch) {
-        await this.createBranch(branchName, baseBranchForCheckout);
+        const success = await this.createBranch(
+          branchName,
+          baseBranchForCheckout,
+        );
+        if (success) {
+          this.nomeBranch = "";
+          await this.loadRemoteBranches(this.selectedFolder);
+        }
+      } else {
+        this.nomeBranch = "";
       }
-
-      this.nomeBranch = "";
-      await this.loadRemoteBranches(this.selectedFolder);
     } finally {
       this.isCreatingBranch = false;
     }
@@ -575,6 +677,17 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
         title: "Aviso",
         kind: "warning",
       });
+      return false;
+    }
+
+    if (!this.isGeneratedNameValid) {
+      await message(
+        "O nome da branch gerado é inválido. Utilize caracteres alfanuméricos.",
+        {
+          title: "Aviso",
+          kind: "warning",
+        },
+      );
       return false;
     }
 
@@ -604,8 +717,8 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     copied: boolean,
   ): Promise<boolean> {
     const messageText = copied
-      ? `Posso mudar de branch para você? ${branchName} já tá no clipboard tbm.`
-      : `Posso mudar de branch para você? Se não quiser, digite manualmente o nome: ${branchName}`;
+      ? `Posso mudar de branch para você? "${branchName}" já tá no clipboard tbm.`
+      : `Posso mudar de branch para você? Se não quiser, digite manualmente o nome: "${branchName}"`;
 
     return ask(messageText, { title: "Mudar de branch", kind: "info" });
   }
@@ -613,12 +726,15 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   private async createBranch(
     branchName: string,
     baseBranch: string,
-  ): Promise<void> {
+  ): Promise<boolean> {
     try {
       const createBranchCmd = Command.create(
         "git",
         ["checkout", "--no-track", "-b", branchName, baseBranch],
-        { cwd: this.selectedFolder, env: { LC_ALL: "C" } },
+        {
+          cwd: this.selectedFolder,
+          env: { LC_ALL: "C", GIT_TERMINAL_PROMPT: "0" },
+        },
       );
       const output = await createBranchCmd.execute();
 
@@ -626,8 +742,10 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
         info(
           `Branch '${branchName}' criada com sucesso a partir de '${baseBranch}'`,
         );
+        return true;
       } else {
         await this.handleCreateBranchError(output.stderr);
+        return false;
       }
     } catch (err) {
       error(`Erro ao executar comando git checkout: ${err}`);
@@ -635,6 +753,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
         title: "Erro",
         kind: "error",
       });
+      return false;
     }
   }
 

@@ -14,8 +14,7 @@
       {
         "title": "Format Branch Name",
         "width": 750,
-        "height": 900,
-        "resizable": false
+        "height": 900
       }
     ],
     "security": {
