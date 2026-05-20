@@ -1,25 +1,8 @@
-/* Arquivo de estilo do componente. */
-
 :host {
-  --color-primary: #1a73e8;
-  --color-primary-tonal-bg: #e8f0fe;
-  --color-primary-tonal-fg: #1967d2;
-  --color-text-primary: #202124;
-  --color-text-secondary: #5f6368;
-  --color-text-disabled: #80868b;
-  --color-surface: #ffffff;
-  --color-surface-variant: #f8f9fa;
-  --color-surface-hover: #f1f3f4;
-  --color-border: #dadce0;
-  --color-border-light: #f1f3f4;
-  --color-error: #d93025;
-  --color-error-bg: #fce8e6;
-  --shadow-elevation-1: 0 4px 12px rgba(0, 0, 0, 0.05), 0 1px 4px rgba(0, 0, 0, 0.02);
-
   display: block;
   font-family: "Roboto", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   color: var(--color-text-primary);
-  background-color: transparent; /* O fundo agora é controlado globalmente */
+  background-color: transparent;
   height: 100%;
   width: 100%;
 }
@@ -33,30 +16,26 @@
   box-sizing: border-box;
 }
 
-/* O Card Principal - Elevação e Elegância */
 .card-container {
   background-color: var(--color-surface);
-  border-radius: 16px; /* Arredondamento moderno M3 */
+  border-radius: 16px;
   box-shadow: var(--shadow-elevation-1);
   width: 100%;
-  max-width: 600px; /* Mais estreito para melhor leitura */
+  max-width: 600px;
   margin: auto;
   display: flex;
   flex-direction: column;
-  transform: translateZ(
-    0
-  ); /* Força a renderização em GPU para evitar ghosting/rastros de sombras na Webview */
+  transform: translateZ(0);
   will-change: transform;
 }
 
-/* Cabeçalho */
 .header-section {
   padding: 32px 32px 16px;
   background: linear-gradient(145deg, var(--color-primary-tonal-bg) 0%, var(--color-surface) 100%);
   border-bottom: 1px solid var(--color-border-light);
   text-align: center;
   position: relative;
-  flex-shrink: 0; /* Impede o cabeçalho de amassar caso haja scroll */
+  flex-shrink: 0;
 }
 
 h1 {
@@ -74,7 +53,6 @@ h1 {
   font-weight: 400;
 }
 
-/* Corpo do Formulário */
 .form-content {
   padding: 24px 32px 32px;
   display: flex;
@@ -101,7 +79,6 @@ h1 {
   padding-bottom: 8px;
 }
 
-/* Grupos e Labels */
 .form-group {
   display: flex;
   flex-direction: column;
@@ -112,7 +89,7 @@ fieldset.form-group {
   border: none;
   margin: 0;
   padding: 0;
-  min-width: 0; /* Previne overflow em flex-containers */
+  min-width: 0;
 }
 
 label,
@@ -123,7 +100,6 @@ legend {
   padding: 0;
 }
 
-/* Wrappers e Inputs */
 .input-wrapper {
   position: relative;
   display: flex;
@@ -180,7 +156,6 @@ legend {
   cursor: not-allowed;
 }
 
-/* Estilo de erro para o input */
 .input-field.input-error {
   border-color: var(--color-error);
   background-color: var(--color-error-bg);
@@ -190,7 +165,6 @@ legend {
   box-shadow: 0 0 0 4px rgba(217, 48, 37, 0.15);
 }
 
-/* Select customizado (legacy class kept for reference se ainda tiver algum select na base) */
 .select-wrapper {
   position: relative;
 }
@@ -216,7 +190,6 @@ select.input-field:disabled {
   cursor: not-allowed;
 }
 
-/* Autocomplete Dropdown List */
 .autocomplete-list {
   position: absolute;
   top: 100%;
@@ -256,7 +229,6 @@ select.input-field:disabled {
   background-color: transparent;
 }
 
-/* Input + Botão (Procurar) */
 .folder-input-group {
   display: flex;
   gap: 12px;
@@ -266,7 +238,6 @@ select.input-field:disabled {
   flex: 1;
 }
 
-/* Dica de texto */
 .hint-text {
   font-size: 13px;
   color: var(--color-text-secondary);
@@ -297,7 +268,6 @@ select.input-field:disabled {
   }
 }
 
-/* Caixa de mensagem de erro */
 .error-message-box {
   color: var(--color-error);
   font-size: 13px;
@@ -307,7 +277,6 @@ select.input-field:disabled {
   gap: 4px;
 }
 
-/* Botões Modernos */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -323,7 +292,6 @@ select.input-field:disabled {
   font-family: inherit;
 }
 
-/* Botão Secundário (Tonal - Material 3 style) */
 .btn-tonal {
   background-color: var(--color-primary-tonal-bg);
   color: var(--color-primary-tonal-fg);
@@ -338,7 +306,6 @@ select.input-field:disabled {
   background-color: #c2d7fa;
 }
 
-/* Botão Primário */
 .btn-primary {
   background-color: var(--color-primary);
   color: var(--color-surface);
@@ -369,10 +336,9 @@ select.input-field:disabled {
   width: 100%;
   padding: 16px 24px;
   font-size: 16px;
-  border-radius: 12px; /* Arredondamento maior para botão principal */
+  border-radius: 12px;
 }
 
-/* Radio Buttons estilo "Cards" Selecionáveis */
 .radio-group-cards {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -384,7 +350,6 @@ select.input-field:disabled {
   cursor: pointer;
 }
 
-/* Esconde o radio real */
 .radio-card input[type="radio"] {
   position: absolute;
   opacity: 0;
@@ -392,7 +357,6 @@ select.input-field:disabled {
   height: 0;
 }
 
-/* Estilo do falso card */
 .radio-card .card-content {
   display: flex;
   flex-direction: column;
@@ -411,12 +375,11 @@ select.input-field:disabled {
   border-color: #d2e3fc;
 }
 
-/* Estado Selecionado */
 .radio-card.selected .card-content {
   background-color: var(--color-primary-tonal-bg);
   border-color: var(--color-primary);
   border-width: 2px;
-  padding: 15px 7px; /* Compensa a borda de 2px para não pular */
+  padding: 15px 7px;
 }
 
 .radio-card .icon {
@@ -443,13 +406,11 @@ select.input-field:disabled {
   font-weight: 700;
 }
 
-/* Área inferior */
 .actions-section {
-  margin-top: 0; /* Reduzido para aproximar o botão do elemento de cima */
-  flex-shrink: 0; /* Impede o botão final de ser esmagado pelo scroll do flexbox */
+  margin-top: 0;
+  flex-shrink: 0;
 }
 
-/* Modal e Settings */
 .settings-btn {
   position: absolute;
   top: 16px;
@@ -538,7 +499,6 @@ select.input-field:disabled {
   gap: 12px;
 }
 
-/* Custom danger button */
 .btn-danger-outline {
   background-color: var(--color-surface);
   color: var(--color-error) !important;
@@ -605,7 +565,6 @@ select.input-field:disabled {
   }
 }
 
-/* Responsividade Básica */
 @media (max-width: 480px) {
   .radio-group-cards {
     grid-template-columns: 1fr;
@@ -620,7 +579,6 @@ select.input-field:disabled {
   }
 }
 
-/* --- Marca d'água de Créditos (Material 3 Label Small) --- */
 .credit-text {
   position: fixed;
   bottom: 10px;
@@ -628,7 +586,7 @@ select.input-field:disabled {
   font-size: 11px;
   font-weight: 500;
   color: var(--color-text-disabled);
-  letter-spacing: 0.5px; /* Padrão de tracking do M3 para Label Small */
+  letter-spacing: 0.5px;
   z-index: 100;
   user-select: none;
   text-decoration: none;

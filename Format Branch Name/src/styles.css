@@ -1,12 +1,29 @@
 /* You can add global styles to this file, and also import other style files */
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
 
+:root {
+  --color-primary: #1a73e8;
+  --color-primary-tonal-bg: #e8f0fe;
+  --color-primary-tonal-fg: #1967d2;
+  --color-text-primary: #202124;
+  --color-text-secondary: #5f6368;
+  --color-text-disabled: #80868b;
+  --color-surface: #ffffff;
+  --color-surface-variant: #f8f9fa;
+  --color-surface-hover: #f1f3f4;
+  --color-border: #dadce0;
+  --color-border-light: #f1f3f4;
+  --color-error: #d93025;
+  --color-error-bg: #fce8e6;
+  --shadow-elevation-1: 0 4px 12px rgba(0, 0, 0, 0.05), 0 1px 4px rgba(0, 0, 0, 0.02);
+}
+
 html, body {
   margin: 0;
   padding: 0;
   width: 100%;
   height: 100vh;
-  overflow: hidden; /* Remove qualquer possibilidade de scroll global */
+  overflow: hidden;
   background-color: #f4f5f7;
   box-sizing: border-box;
 }
