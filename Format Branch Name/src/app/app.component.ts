@@ -227,7 +227,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
       // Verifica se é um repositório git válido antes de executar os comandos pesados
       const statusCmd = Command.create("git", ["status"], {
         cwd: directory,
-        env: { LC_ALL: "C", GIT_TERMINAL_PROMPT: "0" },
+        env: { LC_ALL: "C", GIT_TERMINAL_PROMPT: "0", GIT_SSH_COMMAND: "ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new -F ~/.ssh/config" },
       });
       const statusOutput = await statusCmd.execute();
 
@@ -594,7 +594,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
 
     const cleanText = this.cleanStringForBranch(this.nomeBranch);
 
-    return `${this.branchType}/${cleanText}`;
+    return `${this.branchType === "feature" ? "feat" : this.branchType}/${cleanText}`;
   }
 
   protected get isGeneratedNameValid(): boolean {
