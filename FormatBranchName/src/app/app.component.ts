@@ -18,6 +18,8 @@ import { Command } from "@tauri-apps/plugin-shell";
 import { info, error, warn } from "@tauri-apps/plugin-log";
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
 import { getCurrentWindow, LogicalSize } from "@tauri-apps/api/window";
+import { exists } from "@tauri-apps/plugin-fs";
+import { homeDir, join } from "@tauri-apps/api/path";
 
 @Component({
   selector: "app-root",
@@ -63,6 +65,9 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // UX Improvement: Estado de carregamento na criação
   isCreatingBranch: boolean = false;
+
+  private sshArgs: string =
+    "ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new";
 
   private resizeObserver?: ResizeObserver;
   private resizeTimeout?: ReturnType<typeof setTimeout>; // Armazena o timer do debounce
@@ -225,13 +230,24 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
 
     try {
       // Verifica se é um repositório git válido antes de executar os comandos pesados
+      const homeDirPath = await homeDir();
+      const configPath = await join(homeDirPath, ".ssh", "config");
+      const hasSSHConfig = await exists(configPath);
+
+      info(homeDirPath);
+      info(configPath);
+      info("sshconfig: " + hasSSHConfig);
+
+      if (hasSSHConfig) {
+        this.sshArgs += " -F ~/.ssh/config";
+      }
+
       const statusCmd = Command.create("git", ["status"], {
         cwd: directory,
         env: {
           LC_ALL: "C",
           GIT_TERMINAL_PROMPT: "0",
-          GIT_SSH_COMMAND:
-            "ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new -F ~/.ssh/config",
+          GIT_SSH_COMMAND: this.sshArgs,
         },
       });
       const statusOutput = await statusCmd.execute();
@@ -276,7 +292,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
       env: {
         LC_ALL: "C",
         GIT_TERMINAL_PROMPT: "0",
-        GIT_SSH_COMMAND: "ssh -o BatchMode=yes",
+        GIT_SSH_COMMAND: this.sshArgs,
       },
     });
     const output = await fetchCmd.execute();
@@ -758,8 +774,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
             env: {
               LC_ALL: "C",
               GIT_TERMINAL_PROMPT: "0",
-              GIT_SSH_COMMAND:
-                "ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new -F ~/.ssh/config",
+              GIT_SSH_COMMAND: this.sshArgs,
             },
           },
         );
