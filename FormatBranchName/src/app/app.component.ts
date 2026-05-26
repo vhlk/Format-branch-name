@@ -227,7 +227,12 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
       // Verifica se é um repositório git válido antes de executar os comandos pesados
       const statusCmd = Command.create("git", ["status"], {
         cwd: directory,
-        env: { LC_ALL: "C", GIT_TERMINAL_PROMPT: "0", GIT_SSH_COMMAND: "ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new -F ~/.ssh/config" },
+        env: {
+          LC_ALL: "C",
+          GIT_TERMINAL_PROMPT: "0",
+          GIT_SSH_COMMAND:
+            "ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new -F ~/.ssh/config",
+        },
       });
       const statusOutput = await statusCmd.execute();
 
@@ -744,6 +749,37 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
         info(
           `Branch '${branchName}' criada com sucesso a partir de '${baseBranch}'`,
         );
+
+        const pushCmd = Command.create(
+          "git",
+          ["push", "-u", "origin", branchName],
+          {
+            cwd: this.selectedFolder,
+            env: {
+              LC_ALL: "C",
+              GIT_TERMINAL_PROMPT: "0",
+              GIT_SSH_COMMAND:
+                "ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new -F ~/.ssh/config",
+            },
+          },
+        );
+        const pushOutput = await pushCmd.execute();
+
+        if (pushOutput.code === 0) {
+          info(`Branch '${branchName}' enviada para o remoto com sucesso.`);
+        } else {
+          warn(
+            `A branch local foi criada, mas ocorreu um erro ao enviar para o remoto: ${pushOutput.stderr}`,
+          );
+          await message(
+            `A branch '${branchName}' foi criada localmente, mas não pôde ser enviada para o remoto.\nErro: ${pushOutput.stderr}`,
+            {
+              title: "Aviso",
+              kind: "warning",
+            },
+          );
+        }
+
         return true;
       } else {
         await this.handleCreateBranchError(output.stderr);

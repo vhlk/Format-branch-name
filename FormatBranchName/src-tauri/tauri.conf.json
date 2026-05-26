@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "format-branch-name",
-  "version": "0.9.0",
-  "identifier": "com.vhlk.format-branch-name",
+  "version": "0.9.1",
+  "identifier": "com.vhlk.fbn",
   "build": {
     "beforeDevCommand": "pnpm start",
     "devUrl": "http://localhost:1420",
@@ -24,6 +24,8 @@
   "bundle": {
     "active": true,
     "targets": "all",
+    "shortDescription": "Simples aplicativo para gerar nome de branches",
+    "longDescription": "Veja como eh legal de fazer isso",
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
