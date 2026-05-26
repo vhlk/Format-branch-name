@@ -782,12 +782,19 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
 
         if (pushOutput.code === 0) {
           info(`Branch '${branchName}' enviada para o remoto com sucesso.`);
+          message(
+            `Branch '${branchName}' criada e sincronizada com o remoto!`,
+            {
+              title: "Sucesso",
+              kind: "info",
+            },
+          );
         } else {
           warn(
             `A branch local foi criada, mas ocorreu um erro ao enviar para o remoto: ${pushOutput.stderr}`,
           );
           await message(
-            `A branch '${branchName}' foi criada localmente, mas não pôde ser enviada para o remoto.\nErro: ${pushOutput.stderr}`,
+            `A branch '${branchName}' foi criada localmente, mas não pôde ser sincronizada com o remoto.\nErro: ${pushOutput.stderr}`,
             {
               title: "Aviso",
               kind: "warning",
